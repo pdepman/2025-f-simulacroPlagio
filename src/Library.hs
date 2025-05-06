@@ -37,13 +37,18 @@ autor3 = UnAutor "nn3" [obraB, obraD]
 autor4 :: Autor
 autor4 = UnAutor "nn4" [obraE, obraB]
 
---Punto 2
+--Punto 2 (10')
+
+-- ? En que consiste la version cruda? es una version donde se eliminan los acentos y se quitan los caracteres no alfanuméricos.
+-- ? Hay un orden de preferencia? Si, porque si saco los no alfanuméricos primero, me vuela las que tienen tilde.
 versionCruda :: String -> String
-versionCruda = filter esLetraONumero.map sinAcento
+versionCruda = soloAlfanumericos.sinAcentos
 
-esLetraONumero :: Char ->  Bool
-esLetraONumero caracter = elem caracter todasLasLetrasYNumeros 
+-- ? Como saco los acentos? transformo las letras con acento en letras sin acento (map)
+sinAcentos :: String -> String
+sinAcentos = map sinAcento
 
+-- ? Como reemplazo una letra con acento por una sin? (pattern matching)
 sinAcento :: Char ->  Char
 sinAcento 'á' = 'a'
 sinAcento 'é' = 'e'
@@ -57,27 +62,89 @@ sinAcento 'Ó' = 'O'
 sinAcento 'Ú' = 'U'
 sinAcento letra = letra
 
+-- ? Como saco las letras no alfanumericas? tengo que volarlas al choto, o mejor dicho, quedarme solo con las alfanumericas (filter)
+soloAlfanumericos :: String -> String
+soloAlfanumericos = filter esLetraONumero
 
+-- ? Que significa qeu sea alfanumerico? Es una letra o un numero, es decir, si pertenece a una lista que corresponde a esas caracteristicas
+esLetraONumero :: Char ->  Bool
+esLetraONumero caracter = elem caracter todasLasLetrasYNumeros 
+
+-- ? Cuales son las letras y numeros? En realidad es falso esto porque le sumamos el espacio
 todasLasLetrasYNumeros :: [Char]
-todasLasLetrasYNumeros = ['a'..'z']++['A'..'Z'] ++ "0123456789 "
+todasLasLetrasYNumeros = ['a'..'z']++['A'..'Z'] ++ "0123456789" ++ " "
 
---plagios
 
---Punto 3
+--Punto 3 (15')
+
+-- ? Que es la distancia de Hamming? Representa la diferencia que hay de letras entre dos palabras
+
+-- ? Como puedo averiguar esto? Necesito comparar cada letra y ver si son iguales o distintas. en caso de ser distintas, la distancia de hamming incrementa en uno
+
+-- dist "hola" "pera" = 3 = dist "h" "p" + dist "ola" "era" = 1 + 2
+-- dist "ola" "era" = 2 = dist "o" "e" + dist "la" "ra" = 1 + 1
+-- dist "la" "ra" = 1 = dist "l" "r" + dist "a" "a" = 1 + 0
+-- dist "a" "a" = 0 = dist "a" "a" + dist "" "" = 0 + ???
+
+-- *distanciaHamming :: String -> String -> Number
+-- *distanciaHamming (x:xs) (y:ys) |x /= y = distanciaHamming xs ys + 1
+-- *                               |otherwise = distanciaHamming xs ys
+
+-- ? Que onda con la distancia entre dos cadenas vacias? Si se puede hacer, seria una secuencia infinita ya que 
+-- dist "" "" = dist "" "" + dist "" "" = ??? + ???
+
+-- Como corto esto? Necesito poner una condicion de corte (caso base):
+-- dist "" "" = 0
+
+-- De esta manera
+-- dist "a" "a" = 0 = dist "a" "a" + dist "" "" = 0 + 0
+-- *distanciaHamming [] [] = 0
+
+
 distanciaHamming :: String -> String -> Number
 distanciaHamming [] [] = 0
 distanciaHamming (x:xs) (y:ys) |x /= y = distanciaHamming xs ys + 1
                                |otherwise = distanciaHamming xs ys
 
--- --Punto 4
+
+
+--plagios 
+
+--Punto 4
+-- ? Que es un plagio? Es una copia de una obra. Para que una obra plagie a otra, esta debe ser posterior.
+-- *esPlagio :: Obra -> Obra -> Bool
+-- *esPlagio plagio original = esPosterior plagio original && ???
+
+-- ? Hay distintas formas de plagio. Que son esas formas? Son funciones que detectan plagios. Son formas de deteccion. No me importa ahora mismo como funcionan, solo se que hacen.
+
+-- ? Entonces como queda esPlagio? es plagio si huele a plagio y la plagiadora es posterior a la original
+
+-- * esPlagio :: Obra -> Obra -> FormaDeteccion -> Bool
+-- * esPlagio plagio original deteccion = esPosterior plagio original  && ...
+-- ? Que mas? Hay algo raro, huele.. (huele a plagio)
+
+-- ? Que significa que huele a plagio?
+hueleAPlagio :: Obra -> Obra -> FormaDeteccion -> Bool
+hueleAPlagio plagio original deteccion = deteccion (contenido plagio) (contenido original)
+
+-- ?Como modelo una deteccion? Todas se basan en los titulos y me dicen si es un plagio o no
+-- *
 type FormaDeteccion = String ->  String ->  Bool
+-- *
+-- ? Que significa que sea posterior? que la fecha del plagio es mayor a la de la original
+esPosterior :: Obra -> Obra -> Bool
+esPosterior plagio original = fecha plagio > fecha original
+
 
 esPlagio :: Obra -> Obra -> FormaDeteccion -> Bool
-esPlagio plagio obraOriginal deteccion = fecha plagio > fecha obraOriginal && deteccion (contenido plagio) (contenido obraOriginal)  
+esPlagio plagio original deteccion =  esPosterior plagio original && hueleAPlagio plagio original deteccion
+
+-- esPlagio :: Obra -> Obra -> FormaDeteccion -> Bool
+-- esPlagio plagio obraOriginal deteccion = fecha plagio > fecha obraOriginal && deteccion (contenido plagio) (contenido obraOriginal)  
 
 --a
 copiaLiteral :: FormaDeteccion
-copiaLiteral texto textoOriginal = versionCruda texto == versionCruda  textoOriginal
+copiaLiteral texto textoOriginal = versionCruda texto == versionCruda textoOriginal
 --b
 
 empiezaIgual :: Number ->  FormaDeteccion
