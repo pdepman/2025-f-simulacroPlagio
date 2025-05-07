@@ -1,6 +1,5 @@
 module Library where
 import PdePreludat
-import qualified Control.Applicative as anterior
 
 data Obra = UnaObra {
     contenido :: String,
